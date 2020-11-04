@@ -1,19 +1,27 @@
-from tkinter import Tk, ttk, Frame, PhotoImage, Label, LabelFrame, Text, Button, Toplevel, Scrollbar, messagebox, filedialog
-import os
+from tkinter import Tk, ttk, Frame, PhotoImage, Label, LabelFrame, Text, Button, Toplevel, Scrollbar, messagebox, filedialog, END, simpledialog
+import os, operator
 from Player import Player
 
 # Initialize the list intended for storing Player objects
 players = []
 
+totalPlayers = 60
+
+# Close player list top view window
 def close_topview():
+    # View main window
     root.update()
     root.deiconify()
     
+    # Delete top-level window
     top_level.withdraw()
     
+# Open player list top view window   
 def view_players():
+    # Delete main window
     root.withdraw()
     
+    # View top-level window
     top_level.update()
     top_level.deiconify()
 
@@ -40,25 +48,117 @@ def get_players():
     filename = filedialog.askopenfilename(initialdir=os.getcwd())
 
     # Begin reading the text file
-    with open(filename, "r") as reader:
-
-        line = reader.readline()
-
-        while line != "":
-
-            # Split the line into a list of split strings
-            splitData = line.split(",")
-
-            # Create player object using the string above split by commas
-            player = Player(splitData[0], splitData[1], splitData[2], splitData[3].strip("\n"))
-
-            # Append previously created player object to list
-            players.append(player)
-
+    try:
+        with open(filename, "r") as reader:
+        
             line = reader.readline()
+        
+            while line != "":
+        
+                # Split the line into a list of split strings
+                splitData = line.split(",")
+        
+                # Create player object using the string above split by commas
+                player = Player(splitData[0], splitData[1], int(splitData[2]), splitData[3].strip("\n"))
+        
+                # Append previously created player object to list
+                players.append(player)
+        
+                line = reader.readline()
+    except FileNotFoundError:
+        pass
 
     btnGenerate.config(state="normal")
+    output_players()
+    
+# Output players to tree view top-level widget
+def output_players():
+    global players
+    # Clear items 
+    for i in tview.get_children():
+        tview.delete(i)
 
+    # Insert player objects to tree view
+    for player in range(len(players)):
+        tview.insert("", END, values=(players[player].getLastName(), players[player].getFirstName(), players[player].getTierScore(),
+            players[player].getTier()))
+ 
+# Sort players by headings 
+def sort_players(headingNum):
+    global players
+    # Sort ascending last names
+    if headingNum == 1:
+        players.sort(key=operator.attrgetter("lastName"))
+    # Sort ascending first names
+    elif headingNum ==2:
+        players.sort(key=operator.attrgetter("firstName"))
+    # Sort descending rating, then ascending last name
+    elif headingNum ==3:
+        players = sorted(sorted(players,
+                    key=operator.attrgetter('lastName')),
+                    key=operator.attrgetter('tierScore'), reverse=True)
+    # Sort ascending tier names
+    elif headingNum ==4:
+        players.sort(key=operator.attrgetter("tier"))
+    # Output sorted lists to tree view
+    output_players()
+
+# Delete player from tree view
+def delete_player():
+    # Get user selection
+    playerid = tview.selection()
+    selectedPlayer = tview.item(playerid)["values"]
+    # Nothing selected
+    if selectedPlayer == "":
+        messagebox.showerror("Error", "Please select a player to remove.")
+    else:
+        answer = messagebox.askyesno("Remove Item", "Are you sure you want to remove " + selectedPlayer[1] + " " + selectedPlayer[0]+ "?")
+        # User confirms deletion
+        if answer == True:
+            print("deleted")
+            tview.delete(playerid)
+
+# Add player to tree view            
+def add_player():
+    global totalPlayers, players
+    # Can't have than 64 players
+    if totalPlayers >= 64:
+        messagebox.showwarning("Error", "No more players can be added.\nThe tournament has reached its capacity of 64 competitors")
+    else:
+        # Add last name
+        playerFirstName = simpledialog.askstring("Add Player", "Enter player's first name:")
+        # Add fist name
+        playerLastName = simpledialog.askstring("Add Player", "Enter player's last name:")
+        # Add rating, check if between 0 and 100
+        playerRating = simpledialog.askinteger("Add Player", "Enter player's rating (1-100):")
+        if playerRating > 100 or playerRating < 0: 
+            messagebox.showerror("Error", "Please enter a score between 0 and 100:")
+        else:
+            # Calculate rank
+            playerRank = calc_rank(playerRating) 
+            # Insert new player
+            playerid = tview.insert ("", END, values=(playerLastName, playerFirstName,playerRating, playerRank))
+            # Select new player
+            tview.selection_set(playerid)
+            # Scroll to new player
+            tview.see(playerid)
+ 
+# Calculate player's rank based on their rating       
+def calc_rank(rating):
+    if rating < 50:
+        return "Scout"     
+    elif rating >= 50 and rating <= 59:
+        return "Ranger"
+    elif rating >= 60 and rating <= 69:
+        return "Agent"
+    elif rating >= 70 and rating <= 79:
+        return "Epic"
+    elif rating >= 80:
+        return "Legend"
+    else:
+        return None
+        
+    
 root = Tk()
 root.title('Fortnite Team Tournament')
 root.geometry('%dx%d+%d+%d' % (912, 740, root.winfo_screenwidth() // 2 - 912 // 2,
@@ -128,9 +228,10 @@ tview.grid(row=1, column=0, pady=5)
 headingtext = ('LAST NAME', 'FIRST NAME', 'RATING', 'TIER')
 columnwidths = [150, 150, 75, 75]
 
+# Tree view headings and columns
 for i in range(4):
     tview.column(str(i+1), width=columnwidths[i], anchor='w')
-    tview.heading(str(i+1), text=headingtext[i], anchor='w')
+    tview.heading(str(i+1), text=headingtext[i], anchor='w', command=lambda columnid=i+1: sort_players(columnid))
 
 vscroll = Scrollbar(top_level, orient='vertical', command=tview.yview)
 vscroll.grid(row=1, column=1, sticky='ns')
@@ -138,9 +239,9 @@ vscroll.grid(row=1, column=1, sticky='ns')
 bottomFrame = Frame(top_level, padx=5, pady=5, bg='white')
 bottomFrame.grid(row=2, column=0, columnspan=2)
 
-btnRemove = Button(bottomFrame, text='REMOVE', width=10, pady=5)
+btnRemove = Button(bottomFrame, text='REMOVE', width=10, pady=5, command=lambda: delete_player())
 btnRemove.pack(side='left', padx=5, pady=5)
-btnAdd = Button(bottomFrame, text='ADD', width=10, pady=5)
+btnAdd = Button(bottomFrame, text='ADD', width=10, pady=5, command= lambda: add_player())
 btnAdd.pack(side='left', padx=5, pady=5)
 btnEdit = Button(bottomFrame, text='EDIT', width=10, pady=5)
 btnEdit.pack(side='left', padx=5, pady=5)
