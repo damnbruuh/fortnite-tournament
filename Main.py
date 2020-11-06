@@ -13,6 +13,10 @@ totalPlayers = 0
 lblFrames = [0] * 16
 txtTeams = [0] * 16
 
+# Function passed to btnSaveTeams in order to save the teams.
+def save_teams():
+    pass
+
 # Function passed to btnClear as well as whenever the text boxes have to be cleared.
 def clear_teams():
 
@@ -313,8 +317,6 @@ def generate_teams():
     # Determine the remainder of division by four to see how teams will be generated
     if totalPlayers % 4 == 0:
 
-        # TODO: fix team score being divided by wrong integer
-
         # Get the # of text widgets that will be used to generate teams
         widgetsPerPlayers = totalPlayers / 4
 
@@ -353,18 +355,18 @@ def generate_teams():
     elif totalPlayers % 4 == 3:
 
         # Get the # of text widgets that will be used to generate teams, use floor division since there will be a remainder
-        widgetsPerPlayers = int(totalPlayers / 4) + 1
+        widgetsPerPlayers = int(totalPlayers / 4)
 
         # Initialize a player counter variable that will iterate by one. This is used to access the indices of the players[] list.
         playerCounter = 0
 
         # Iterate through the # of text widgets being used
-        for x in range(int(widgetsPerPlayers)):
+        for x in range(int(widgetsPerPlayers + 1)):
 
             # Initiate the team average var. This will be used to calculate the average of each team and display it.
             teamAverage = 0
 
-            if playerCounter == ((widgetsPerPlayers - 1) * 4):
+            if playerCounter == (widgetsPerPlayers * 4):
 
                 for i in range(3):
 
@@ -387,8 +389,6 @@ def generate_teams():
                 # Iterate four times since there will be four players per text widget
                 for i in range(4):
 
-                    print(playerCounter)
-
                     # Get player object from list players
                     player = players[playerCounter]
 
@@ -403,8 +403,16 @@ def generate_teams():
 
                     playerCounter += 1
 
-            # Calculate team average, round it then convert it to an int
-            teamAverage = int(round(teamAverage / 4))
+            # Team is four people
+            if x == widgetsPerPlayers:
+
+                teamAverage = int(round(teamAverage / 3))
+
+            # Team is three people
+            else:
+
+                # Calculate team average, round it then convert it to an int
+                teamAverage = int(round(teamAverage / 4))
 
             # Output the team average as the last line.
             txtTeams[x].insert(END, "\n{0:<20s}{1:>5d}".format("TEAM RATING:", teamAverage))
@@ -476,7 +484,69 @@ def generate_teams():
             txtTeams[x].insert(END, "\n{0:<20s}{1:>5d}".format("TEAM RATING:", teamAverage))
 
     elif totalPlayers % 4 == 1:
-        pass
+
+        # Get the # of text widgets that will be used to generate teams
+        widgetsPerPlayers = int(totalPlayers / 4)
+
+        # Initialize a player counter variable that will iterate by one. This is used to access the indices of the players[] list.
+        playerCounter = 0
+
+        # Iterate through the # of text widgets being used
+        for x in range(widgetsPerPlayers + 1):
+
+            # Initiate the team average var. This will be used to calculate the average of each team and display it.
+            teamAverage = 0
+
+            if playerCounter == (widgetsPerPlayers - 2) * 4 or playerCounter == (widgetsPerPlayers - 2) * 4 + 3 or playerCounter == (widgetsPerPlayers - 2) * 4 + 6:
+
+                for i in range(3):
+                    # Get player object from list players
+                    player = players[playerCounter]
+
+                    # Create a string of concatenated player object values obtained earlier
+                    insertString = str(player.getFirstName()) + " " + str(player.getLastName())
+
+                    # Insert formatted player's values
+                    txtTeams[x].insert(END, "{0:<20s}{1:>5d}\n".format(insertString, player.getTierScore()))
+
+                    # Increase team average by individual players tierScore
+                    teamAverage = teamAverage + player.getTierScore()
+
+                    playerCounter += 1
+
+            else:
+
+                # Iterate four times since there will be four players per text widget
+                for i in range(4):
+
+                    # Get player object from list players
+                    player = players[playerCounter]
+
+                    # Create a string of concatenated player object values obtained earlier
+                    insertString = str(player.getFirstName()) + " " + str(player.getLastName())
+
+                    # Insert formatted player's values
+                    txtTeams[x].insert(END, "{0:<20s}{1:>5d}\n".format(insertString, player.getTierScore()))
+
+                    # Increase team average by individual players tierScore
+                    teamAverage = teamAverage + player.getTierScore()
+
+                    playerCounter += 1
+
+            # Team is three people
+            if x == widgetsPerPlayers - 2 or x == widgetsPerPlayers - 1 or x == widgetsPerPlayers:
+
+                # Calculate team average by dividing by 3
+                teamAverage = int(round(teamAverage / 3))
+
+            # Team is four people
+            else:
+
+                # Calculate team average, round it then convert it to an int
+                teamAverage = int(round(teamAverage / 4))
+
+            # Output the team average as the last line.
+            txtTeams[x].insert(END, "\n{0:<20s}{1:>5d}".format("TEAM RATING:", teamAverage))
 
     # Finally, set the text widgets back to disabled state
     for x in range(len(txtTeams)):
