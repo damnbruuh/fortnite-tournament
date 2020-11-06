@@ -1,7 +1,6 @@
 from tkinter import Tk, ttk, Frame, PhotoImage, Label, LabelFrame, Text, Button, Toplevel, Scrollbar, messagebox, filedialog, END, simpledialog
-import os, operator
+import os, operator, random
 from Player import Player
-import random
 
 # Initialize the list intended for storing Player objects
 players = []
