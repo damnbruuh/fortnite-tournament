@@ -1,12 +1,36 @@
 from tkinter import Tk, ttk, Frame, PhotoImage, Label, LabelFrame, Text, Button, Toplevel, Scrollbar, messagebox, filedialog, END, simpledialog
 import os, operator
 from Player import Player
+import random
 
 # Initialize the list intended for storing Player objects
 players = []
 
 # Total players entered into tournament
-totalPlayers = 60
+totalPlayers = 0
+
+# Initialize team grid
+lblFrames = [0] * 16
+txtTeams = [0] * 16
+
+# Function passed to btnClear as well as whenever the text boxes have to be cleared.
+def clear_teams():
+
+    global txtTeams
+
+    # Loop through all text widgets
+    for x in range(len(txtTeams)):
+
+        # Enable text widgets so they can be edited
+        txtTeams[x].config(state="normal")
+
+        # Clear all the text
+        txtTeams[x].delete(0.0, END)
+
+        # Set the widgets back to disabled
+        txtTeams[x].config(state="disabled")
+
+
 
 # Close player list top view window
 def close_topview():
@@ -42,7 +66,7 @@ def exit_program():
 # Function passed to btnGetPlayers
 def get_players():
 
-    global players, filename
+    global players, filename, totalPlayers
 
     # Open file dialog, ask user to open a file
     # Open file dialog in the running directory of this program
@@ -60,6 +84,7 @@ def get_players():
         
                 # Create player object using the string above split by commas
                 player = Player(splitData[0], splitData[1], int(splitData[2]), splitData[3].strip("\n"))
+                totalPlayers += 1
         
                 # Append previously created player object to list
                 players.append(player)
@@ -106,7 +131,7 @@ def sort_players(headingNum):
 
 # Delete player from tree view
 def delete_player():
-    global filename, players
+    global filename, players, totalPlayers
     # Get user selection
     playerid = tview.selection()
     selectedPlayer = tview.item(playerid)["values"]
@@ -183,6 +208,8 @@ def add_player():
             players.append(player)
             # Update document
             update_playerlist()
+
+            # Update totalplayers
             
 # Update document of players            
 def update_playerlist():
@@ -260,7 +287,202 @@ def calc_rank(rating):
     # Doesn't correspond with existing ranks
     else:
         return None
-    
+
+# Function passed to btnGenerate to generate the teams
+def generate_teams():
+
+    global players
+    global totalPlayers
+    global txtTeams
+
+    print(totalPlayers) # debugging
+
+    print(str(len(players)) + " player list length")
+
+    # In the event the user clicks generate teams again without clicking clear, we will handle that for them and generate new teams anyway.
+    clear_teams()
+
+    # Shuffle the players list in order to ensure randomness
+    random.shuffle(players)
+
+    # Loop through all the text widgets and change their state to enabled so we can edit them
+    for x in range(len(txtTeams)):
+
+        txtTeams[x].config(state="normal")
+
+    # Determine the remainder of division by four to see how teams will be generated
+    if totalPlayers % 4 == 0:
+
+        # TODO: fix team score being divided by wrong integer
+
+        # Get the # of text widgets that will be used to generate teams
+        widgetsPerPlayers = totalPlayers / 4
+
+        # Initialize a player counter variable that will iterate by one. This is used to access the indices of the players[] list.
+        playerCounter = 0
+
+        # Iterate through the # of text widgets being used
+        for x in range(int(widgetsPerPlayers)):
+
+            # Initiate the team average var. This will be used to calculate the average of each team and display it.
+            teamAverage = 0
+
+            # Iterate four times since there will be four players per text widget
+            for i in range(4):
+
+                # Get player object from list players
+                player = players[playerCounter]
+
+                # Create a string of concatenated player object values obtained earlier
+                insertString = str(player.getFirstName()) + " " + str(player.getLastName())
+
+                # Insert formatted player's values
+                txtTeams[x].insert(END, "{0:<20s}{1:>5d}\n".format(insertString, player.getTierScore()))
+
+                # Increase team average by individual players tierScore
+                teamAverage = teamAverage + player.getTierScore()
+
+                playerCounter += 1
+
+            # Calculate team average, round it then convert it to an int
+            teamAverage = int(round(teamAverage / 4))
+
+            # Output the team average as the last line.
+            txtTeams[x].insert(END, "\n{0:<20s}{1:>5d}".format("TEAM RATING:", teamAverage))
+
+    elif totalPlayers % 4 == 3:
+
+        # Get the # of text widgets that will be used to generate teams, use floor division since there will be a remainder
+        widgetsPerPlayers = int(totalPlayers / 4) + 1
+
+        # Initialize a player counter variable that will iterate by one. This is used to access the indices of the players[] list.
+        playerCounter = 0
+
+        # Iterate through the # of text widgets being used
+        for x in range(int(widgetsPerPlayers)):
+
+            # Initiate the team average var. This will be used to calculate the average of each team and display it.
+            teamAverage = 0
+
+            if playerCounter == ((widgetsPerPlayers - 1) * 4):
+
+                for i in range(3):
+
+                    # Get player object from list players
+                    player = players[playerCounter]
+
+                    # Create a string of concatenated player object values obtained earlier
+                    insertString = str(player.getFirstName()) + " " + str(player.getLastName())
+
+                    # Insert formatted player's values
+                    txtTeams[x].insert(END, "{0:<20s}{1:>5d}\n".format(insertString, player.getTierScore()))
+
+                    # Increase team average by individual players tierScore
+                    teamAverage = teamAverage + player.getTierScore()
+
+                    playerCounter += 1
+
+            else:
+
+                # Iterate four times since there will be four players per text widget
+                for i in range(4):
+
+                    print(playerCounter)
+
+                    # Get player object from list players
+                    player = players[playerCounter]
+
+                    # Create a string of concatenated player object values obtained earlier
+                    insertString = str(player.getFirstName()) + " " + str(player.getLastName())
+
+                    # Insert formatted player's values
+                    txtTeams[x].insert(END, "{0:<20s}{1:>5d}\n".format(insertString, player.getTierScore()))
+
+                    # Increase team average by individual players tierScore
+                    teamAverage = teamAverage + player.getTierScore()
+
+                    playerCounter += 1
+
+            # Calculate team average, round it then convert it to an int
+            teamAverage = int(round(teamAverage / 4))
+
+            # Output the team average as the last line.
+            txtTeams[x].insert(END, "\n{0:<20s}{1:>5d}".format("TEAM RATING:", teamAverage))
+
+    elif totalPlayers % 4 == 2:
+
+        # Get the # of text widgets that will be used to generate teams
+        widgetsPerPlayers = int(totalPlayers / 4)
+
+        # Initialize a player counter variable that will iterate by one. This is used to access the indices of the players[] list.
+        playerCounter = 0
+
+        # Iterate through the # of text widgets being used
+        for x in range(widgetsPerPlayers + 1):
+
+            # Initiate the team average var. This will be used to calculate the average of each team and display it.
+            teamAverage = 0
+
+            if playerCounter == (widgetsPerPlayers - 1) * 4 or playerCounter == (widgetsPerPlayers - 1) * 4 + 3:
+
+                for i in range(3):
+
+                    # Get player object from list players
+                    player = players[playerCounter]
+
+                    # Create a string of concatenated player object values obtained earlier
+                    insertString = str(player.getFirstName()) + " " + str(player.getLastName())
+
+                    # Insert formatted player's values
+                    txtTeams[x].insert(END, "{0:<20s}{1:>5d}\n".format(insertString, player.getTierScore()))
+
+                    # Increase team average by individual players tierScore
+                    teamAverage = teamAverage + player.getTierScore()
+
+                    playerCounter += 1
+
+            else:
+
+                # Iterate four times since there will be four players per text widget
+                for i in range(4):
+
+                    # Get player object from list players
+                    player = players[playerCounter]
+
+                    # Create a string of concatenated player object values obtained earlier
+                    insertString = str(player.getFirstName()) + " " + str(player.getLastName())
+
+                    # Insert formatted player's values
+                    txtTeams[x].insert(END, "{0:<20s}{1:>5d}\n".format(insertString, player.getTierScore()))
+
+                    # Increase team average by individual players tierScore
+                    teamAverage = teamAverage + player.getTierScore()
+
+                    playerCounter += 1
+
+            # Team is three people
+            if x == widgetsPerPlayers - 1 or x == widgetsPerPlayers:
+
+                # Calculate team average by dividing by 3
+                teamAverage = int(round(teamAverage / 3))
+
+            # Team is four people
+            else:
+
+                # Calculate team average, round it then convert it to an int
+                teamAverage = int(round(teamAverage / 4))
+
+            # Output the team average as the last line.
+            txtTeams[x].insert(END, "\n{0:<20s}{1:>5d}".format("TEAM RATING:", teamAverage))
+
+    elif totalPlayers % 4 == 1:
+        pass
+
+    # Finally, set the text widgets back to disabled state
+    for x in range(len(txtTeams)):
+
+        txtTeams[x].config(state="disabled")
+
 # Initialize window and centre  
 root = Tk()
 root.title('Fortnite Team Tournament')
@@ -274,9 +496,6 @@ frame.pack()
 imgBanner = PhotoImage(file='images/fortnite_banner.png')
 lblBanner = Label(frame, image=imgBanner, padx=10, pady=10, borderwidth=0)
 lblBanner.grid(row=0, column=0, columnspan=5, pady=5)
-# Create team grid
-lblFrames = [0] * 16
-txtTeams = [0] * 16
 rownum, colnum = 1, 0
 for i in range(len(lblFrames)):
     lblFrames[i] = LabelFrame(frame, text='TEAM ' + str(i+1), bg='white', font=('Consolas', 11, 'bold'))
@@ -297,11 +516,11 @@ btnPlayers = Button(buttonFrame, text='GET PLAYERS', width=15, height=2, command
 btnPlayers.pack(side='top', padx=5, pady=5)
 btnView = Button(buttonFrame, text='VIEW PLAYERS', width=15, height=2, command=view_players)
 btnView.pack(side='top', padx=5, pady=5)
-btnGenerate = Button(buttonFrame, text='GENERATE', width=15, height=2, state='disabled')
+btnGenerate = Button(buttonFrame, text='GENERATE', width=15, height=2, state='disabled', command=generate_teams)
 btnGenerate.pack(side='top', padx=5, pady=5)
 btnSave = Button(buttonFrame, text='SAVE TEAMS', width=15, height=2, state='disabled')
 btnSave.pack(side='top', padx=5, pady=5)
-btnClear = Button(buttonFrame, text='CLEAR', width=15, height=2)
+btnClear = Button(buttonFrame, text='CLEAR', width=15, height=2, command=clear_teams)
 btnClear.pack(side='top', padx=5, pady=5)
 btnExit = Button(buttonFrame, text='EXIT', width=15, height=2, command=exit_program)
 btnExit.pack(side='top', padx=5, pady=5)

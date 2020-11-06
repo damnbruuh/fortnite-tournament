@@ -11,13 +11,13 @@ class Player:
         - Any other parameters will be ignored
         '''
 
-        self.__lastName = args[0]
+        self.lastName = args[0]
 
-        self.__firstName = args[1]
+        self.firstName = args[1]
 
-        self.__tierScore = args[2]
+        self.tierScore = args[2]
 
-        self.__tier = args[3]
+        self.tier = args[3]
 
     def getTier(self):
 
@@ -27,7 +27,7 @@ class Player:
         Returns: tier (string)
         '''
 
-        return self.__tier
+        return self.tier
 
     def getTierScore(self):
 
@@ -37,7 +37,7 @@ class Player:
         Returns: tierScore (int)
         '''
 
-        return self.__tierScore
+        return self.tierScore
 
     def getFirstName(self):
 
@@ -47,7 +47,7 @@ class Player:
         Returns: firstName (string)
         '''
 
-        return self.__firstName
+        return self.firstName
 
     def getLastName(self):
 
@@ -57,7 +57,7 @@ class Player:
         Returns: lastName (string)
         '''
 
-        return self.__lastName
+        return self.lastName
 
     def setTier(self, strTier):
 
@@ -68,7 +68,7 @@ class Player:
         - Changes self.__tier to args provided
         '''
 
-        self.__tier = strTier
+        self.tier = strTier
 
     def setTierScore(self, intTierScore):
 
@@ -79,7 +79,7 @@ class Player:
         - Changes self.__tierScore to args provided
         '''
 
-        self.__tierScore = intTierScore
+        self.tierScore = intTierScore
 
     def setFirstName(self, strFirstName):
 
@@ -90,7 +90,7 @@ class Player:
         - Changes self.__firstName to args provided
         '''
 
-        self.__firstName = strFirstName
+        self.firstName = strFirstName
 
     def setLastName(self, strLastName):
 
@@ -101,7 +101,7 @@ class Player:
         - Changes self.__lastName to args provided
         '''
 
-        self.__lastName = strLastName
+        self.lastName = strLastName
 
 
 

@@ -1,9 +1,7 @@
-Dowyer,Belva,60,Agent
 Rain,Brit,94,Legend
 Nisen,Link,91,Legend
 Meriet,Avram,58,Ranger
 Wiltshier,Ellissa,46,Scout
-Brassington,Bent,73,Epic
 MacGilmartin,Heddie,7,Scout
 Ousby,Marten,73,Epic
 Pehrsson,Rorke,98,Legend
