@@ -1,6 +1,7 @@
 from tkinter import Tk, ttk, Frame, PhotoImage, Label, LabelFrame, Text, Button, Toplevel, Scrollbar, messagebox, filedialog, END, simpledialog
-import os, operator, random
+import os, operator
 from Player import Player
+import random
 
 # Initialize the list intended for storing Player objects
 players = []
@@ -14,7 +15,38 @@ txtTeams = [0] * 16
 
 # Function passed to btnSaveTeams in order to save the teams.
 def save_teams():
-    pass
+
+    global txtTeams
+
+    # Get the player to choose where to save their file
+    filename = filedialog.asksaveasfile(initialdir=os.getcwd(), filetypes=[("DOC files (*.doc)", "*.doc")], defaultextension=".doc")
+
+    # If the user clicked cancel
+    if filename is None:
+
+        # Tell the user that they have to save to a file
+        messagebox.showerror("Error", "You must enter a valid file name and click save.")
+
+    else:
+
+        # Iterate through all text widgets in the list
+        for x in range(len(txtTeams)):
+
+            # Print the team title to the doc file
+            filename.write("TEAM: " + str(x + 1) + "\n\n")
+
+            # Determine if the text widget has a null string. If it does, print in the doc file that no team was formed.
+            if txtTeams[x].get(0.0, END) is None:
+
+                filename.write("\nN/A, no team was formed\n")
+
+            # Otherwise, a team was formed, thus print the teams
+            else:
+
+                filename.write(txtTeams[x].get(0.0, END) + "\n")
+
+        # Close the file
+        filename.close()
 
 # Function passed to btnClear as well as whenever the text boxes have to be cleared.
 def clear_teams():
@@ -40,15 +72,15 @@ def close_topview():
     # View main window
     root.update()
     root.deiconify()
-    
+
     # Delete top-level window
     top_level.withdraw()
-    
-# Open player list top view window   
+
+# Open player list top view window
 def view_players():
     # Delete main window
     root.withdraw()
-    
+
     # View top-level window
     top_level.update()
     top_level.deiconify()
@@ -78,17 +110,17 @@ def get_players():
     # Begin reading the text file
     try:
         with open(filename, "r") as reader:
-        
+
             line = reader.readline()
             while line != "":
-        
+
                 # Split the line into a list of split strings
                 splitData = line.split(",")
-        
+
                 # Create player object using the string above split by commas
                 player = Player(splitData[0], splitData[1], int(splitData[2]), splitData[3].strip("\n"))
                 totalPlayers += 1
-        
+
                 # Append previously created player object to list
                 players.append(player)
                 line = reader.readline()
@@ -98,12 +130,12 @@ def get_players():
         messagebox.showerror("Error","This is not a valid file type" )
     btnGenerate.config(state="normal")
     output_players()
-    
-    
+
+
 # Output players to tree view top-level widget
 def output_players():
     global players
-    # Clear items 
+    # Clear items
     for i in tview.get_children():
         tview.delete(i)
 
@@ -111,8 +143,8 @@ def output_players():
     for player in range(len(players)):
         tview.insert("", END, values=(players[player].getLastName(), players[player].getFirstName(), players[player].getTierScore(),
             players[player].getTier()))
- 
-# Sort players by headings 
+
+# Sort players by headings
 def sort_players(headingNum):
     global players
     # Sort ascending last names
@@ -146,23 +178,23 @@ def delete_player():
         # User confirms deletion
         if answer == True:
             # Delete player object from list corresponding with tree view selection
-            for x in players:    
+            for x in players:
                 if (x.getLastName() + "," + x.getFirstName() + "," + str(x.getTierScore()) + ","  + x.getTier()) == (selectedPlayer[0] + "," + selectedPlayer[1] + "," + str(selectedPlayer[2]) + ","  + selectedPlayer[3]):
                         players.remove(x)
                         break
-        # Delete from tree view   
+        # Delete from tree view
         tview.delete(playerid)
         # Update document
         update_playerlist()
 
-# Add player to tree view            
+# Add player to tree view
 def add_player():
     global totalPlayers, players
     addLastName, addFirstName = True, True
     # Can't have than 64 players
     if totalPlayers >= 64:
         messagebox.showwarning("Error", "No more players can be added.\nThe tournament has reached its capacity of 64 competitors")
-    else: 
+    else:
         # Add first name
         while addFirstName:
             playerFirstName = simpledialog.askstring("Add Player", "Enter player's first name:")
@@ -172,13 +204,13 @@ def add_player():
             else:
                 messagebox.showerror("Error", "Please add a first name")
         # Add last name
-        while addLastName:  
-            playerLastName = simpledialog.askstring("Add Player", "Enter player's last name:")    
+        while addLastName:
+            playerLastName = simpledialog.askstring("Add Player", "Enter player's last name:")
             # Player entered a string, go to next value
             if playerLastName != "":
-                addLastName = False 
+                addLastName = False
             else:
-                messagebox.showerror("Error", "Please add a last name") 
+                messagebox.showerror("Error", "Please add a last name")
         # Check for duplicate player
         duplicate = False
         for i in tview.get_children():
@@ -194,9 +226,9 @@ def add_player():
         # No duplicates found
         if duplicate == False:
             # Add rating, check if between 0 and 100
-            playerRating = simpledialog.askinteger("Add Player", "Enter player's rating (1-100):", minvalue=0, maxvalue=100)        
+            playerRating = simpledialog.askinteger("Add Player", "Enter player's rating (1-100):", minvalue=0, maxvalue=100)
             # Calculate rank
-            playerRank = calc_rank(playerRating) 
+            playerRank = calc_rank(playerRating)
             # Insert new player
             playerid = tview.insert ("", END, values=(playerLastName, playerFirstName,playerRating, playerRank))
             # Select new player
@@ -213,8 +245,8 @@ def add_player():
             update_playerlist()
 
             # Update totalplayers
-            
-# Update document of players            
+
+# Update document of players
 def update_playerlist():
     global players, filename, totalPlayers
     index = 0
@@ -230,12 +262,12 @@ def update_playerlist():
         players[index].setTier(info[3])
         # Next object in list
         index += 1
-    # Over write file  
+    # Over write file
     with open(filename, "wt") as writer:
         # For each player object, write comma delimited string on new line
         for x in players:
             writer.write(x.getLastName() + "," + x.getFirstName() + "," + str(x.getTierScore()) + "," + x.getTier() +"\n")
-            
+
 # Edit player rating
 def edit_player():
     global filename
@@ -247,16 +279,16 @@ def edit_player():
         messagebox.showerror("Error", "Please select a player to edit.")
     else:
         # Edit rating, check if between 0 and 100
-        playerRating = simpledialog.askinteger("Add Player", "Enter player's rating (1-100):", minvalue=0, maxvalue=100) 
-        playerTier = calc_rank(playerRating) 
+        playerRating = simpledialog.askinteger("Add Player", "Enter player's rating (1-100):", minvalue=0, maxvalue=100)
+        playerTier = calc_rank(playerRating)
         tview.set(playerid,column=3, value=playerRating)
         tview.set(playerid,column=4, value=playerTier)
         # Select new player
         tview.selection_set(playerid)
         # Scroll to new player
-        tview.see(playerid)  
-        # Update document  
-        update_playerlist()   
+        tview.see(playerid)
+        # Update document
+        update_playerlist()
 # Search for player
 def search_player():
     searchPlayer = simpledialog.askstring("Search Player", "Enter player's name (FistName LastName):")
@@ -270,15 +302,15 @@ def search_player():
             tview.selection_set(i)
             tview.see(i)
             found = True
-            break  
+            break
     # Can't find player
     if found == False:
         messagebox.showerror("Search Player", searchPlayer + " is not entered in the tournament")
-               
-# Calculate player's rank based on their rating       
+
+# Calculate player's rank based on their rating
 def calc_rank(rating):
     if rating < 50:
-        return "Scout"     
+        return "Scout"
     elif rating >= 50 and rating <= 59:
         return "Ranger"
     elif rating >= 60 and rating <= 69:
@@ -548,7 +580,10 @@ def generate_teams():
 
         txtTeams[x].config(state="disabled")
 
-# Initialize window and centre  
+    # Change state of btnSave to normal
+    btnSave.config(state="normal")
+
+# Initialize window and centre
 root = Tk()
 root.title('Fortnite Team Tournament')
 root.geometry('%dx%d+%d+%d' % (912, 740, root.winfo_screenwidth() // 2 - 912 // 2,
@@ -557,7 +592,7 @@ root.resizable(False, False)
 # Create frame
 frame = Frame(root, padx=10, pady=10, bg='white')
 frame.pack()
-# Create Fornite banner 
+# Create Fornite banner
 imgBanner = PhotoImage(file='images/fortnite_banner.png')
 lblBanner = Label(frame, image=imgBanner, padx=10, pady=10, borderwidth=0)
 lblBanner.grid(row=0, column=0, columnspan=5, pady=5)
@@ -566,7 +601,7 @@ for i in range(len(lblFrames)):
     lblFrames[i] = LabelFrame(frame, text='TEAM ' + str(i+1), bg='white', font=('Consolas', 11, 'bold'))
     txtTeams[i] = Text(lblFrames[i], width=25, height=6, font=('Consolas', 8), state='disabled', relief='flat', bg='white')
     txtTeams[i].pack(padx=5, pady=5)
-    
+
     lblFrames[i].grid(row=rownum, column=colnum, padx=5, pady=5)
     if (i + 1) % 4 == 0:
         rownum += 1
@@ -583,7 +618,7 @@ btnView = Button(buttonFrame, text='VIEW PLAYERS', width=15, height=2, command=v
 btnView.pack(side='top', padx=5, pady=5)
 btnGenerate = Button(buttonFrame, text='GENERATE', width=15, height=2, state='disabled', command=generate_teams)
 btnGenerate.pack(side='top', padx=5, pady=5)
-btnSave = Button(buttonFrame, text='SAVE TEAMS', width=15, height=2, state='disabled')
+btnSave = Button(buttonFrame, text='SAVE TEAMS', width=15, height=2, state='disabled', command=save_teams)
 btnSave.pack(side='top', padx=5, pady=5)
 btnClear = Button(buttonFrame, text='CLEAR', width=15, height=2, command=clear_teams)
 btnClear.pack(side='top', padx=5, pady=5)
