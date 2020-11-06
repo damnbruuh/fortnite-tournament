@@ -93,9 +93,9 @@ def get_players():
                 players.append(player)
                 line = reader.readline()
     except FileNotFoundError:
-        messagebox.showerror("Error", "This is not a valid file type")
+        messagebox.showerror("Error", "Please select a file")
     except IndexError:
-        messagebox.showerror("Error", "This is not a valid file type")
+        messagebox.showerror("Error","This is not a valid file type" )
     btnGenerate.config(state="normal")
     output_players()
     
