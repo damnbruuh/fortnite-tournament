@@ -1,3 +1,9 @@
+# Robert Motrogeanu and Alvaro Martin del Campo
+# ICS4U1
+# 2020 / 11 / 5
+# Fortnite Tournament
+
+# Imports
 from tkinter import Tk, ttk, Frame, PhotoImage, Label, LabelFrame, Text, Button, Toplevel, Scrollbar, messagebox, filedialog, END, simpledialog
 import os, operator
 from Player import Player
