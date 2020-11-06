@@ -245,6 +245,7 @@ def add_player():
                     tview.selection_set(i)
                     tview.see(i)
                     duplicate = True
+                    adding = False
                     break
             # No duplicates found
             if duplicate == False and adding == True:
