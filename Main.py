@@ -179,76 +179,99 @@ def delete_player():
         messagebox.showerror("Error", "Please select a player to remove.")
     else:
         answer = messagebox.askyesno("Remove Item", "Are you sure you want to remove " + selectedPlayer[1] + " " + selectedPlayer[0]+ "?")
-        # User confirms deletion
-        if answer == True:
+        # User clicks no or no inpit
+        if answer == False or answer == None:
+            pass
+        # user confirms deletion    
+        elif answer == True:
             # Delete player object from list corresponding with tree view selection
             for x in players:
                 if (x.getLastName() + "," + x.getFirstName() + "," + str(x.getTierScore()) + ","  + x.getTier()) == (selectedPlayer[0] + "," + selectedPlayer[1] + "," + str(selectedPlayer[2]) + ","  + selectedPlayer[3]):
                         players.remove(x)
                         break
-        # Delete from tree view
-        tview.delete(playerid)
-        # Update document
-        update_playerlist()
+            # Delete from tree view
+            tview.delete(playerid)
+            # Update document
+            update_playerlist()
 
 # Add player to tree view
 def add_player():
     global totalPlayers, players
-    addLastName, addFirstName = True, True
+    addLastName, addFirstName, adding = True, True, True
     # Can't have than 64 players
     if totalPlayers >= 64:
         messagebox.showwarning("Error", "No more players can be added.\nThe tournament has reached its capacity of 64 competitors")
     else:
-        # Add first name
-        while addFirstName:
-            playerFirstName = simpledialog.askstring("Add Player", "Enter player's first name:")
-            # Player entered a string, go to next value
-            if playerFirstName != "":
-                addFirstName = False
-            else:
-                messagebox.showerror("Error", "Please add a first name")
-        # Add last name
-        while addLastName:
-            playerLastName = simpledialog.askstring("Add Player", "Enter player's last name:")
-            # Player entered a string, go to next value
-            if playerLastName != "":
-                addLastName = False
-            else:
-                messagebox.showerror("Error", "Please add a last name")
-        # Check for duplicate player
-        duplicate = False
-        for i in tview.get_children():
-            x = tview.set(i)
-            # Last name and first names are the same
-            if x["1"] == playerLastName and x["2"] == playerFirstName:
-                messagebox.showerror("Error", playerFirstName + " " + playerLastName + " already exists!")
-                # Select player
-                tview.selection_set(i)
-                tview.see(i)
-                duplicate = True
-                break
-        # No duplicates found
-        if duplicate == False:
-            # Add rating, check if between 0 and 100
-            playerRating = simpledialog.askinteger("Add Player", "Enter player's rating (1-100):", minvalue=0, maxvalue=100)
-            # Calculate rank
-            playerRank = calc_rank(playerRating)
-            # Insert new player
-            playerid = tview.insert ("", END, values=(playerLastName, playerFirstName,playerRating, playerRank))
-            # Select new player
-            tview.selection_set(playerid)
-            # Scroll to new player
-            tview.see(playerid)
-            # Get value info on new player
-            info = tview.item(playerid)["values"]
-            # Create new player object with info
-            player = Player(info[0], info[1], info[2], info[3])
-            # Add player object to list
-            players.append(player)
-            # Update document
-            update_playerlist()
+        # Adding player is true
+        while adding:
+            # Add first name
+            while addFirstName:
+                playerFirstName = simpledialog.askstring("Add Player", "Enter player's first name:")
+                # Clicks cancel, stop adding
+                if playerFirstName == None:
+                    adding = False
+                    break
+                # Player entered a string, go to next value
+                if playerFirstName != "":
+                    addFirstName = False
+                else:
+                    messagebox.showerror("Error", "Please add a first name")
+            # Add last name
+            while addLastName and playerFirstName != None:
+                playerLastName = simpledialog.askstring("Add Player", "Enter player's last name:")
+                # Clicks cancel, stop adding
+                if playerLastName == None:
+                    adding = False
+                    break
+                # Player entered a string, go to next value
+                if playerLastName != "":
+                    addLastName = False
+                else:
+                    messagebox.showerror("Error", "Please add a last name")
+            # Check for duplicate player
+            duplicate = False
+            for i in tview.get_children():
+                x = tview.set(i)
+                # Last name and first names are the same
+                if x["1"] == playerLastName and x["2"] == playerFirstName:
+                    messagebox.showerror("Error", playerFirstName + " " + playerLastName + " already exists!")
+                    # Select player
+                    tview.selection_set(i)
+                    tview.see(i)
+                    duplicate = True
+                    break
+            # No duplicates found
+            if duplicate == False and adding == True:
+                # Add rating, check if between 0 and 100
+                playerRating = simpledialog.askinteger("Add Player", "Enter player's rating (1-100):", minvalue=0, maxvalue=100)
+                # Clicks cancel, stop adding
+                if playerRating == None:
+                    adding = False
+                    break
+                else:
+                    # Calculate rank
+                    playerRank = calc_rank(playerRating)
+                    # Clicks cancel, stop adding
+                    if playerRank == None:
+                         adding = False
+                         break
+                    else:
+                        # Insert new player
+                        playerid = tview.insert ("", END, values=(playerLastName, playerFirstName,playerRating, playerRank))
+                        # Select new player
+                        tview.selection_set(playerid)
+                        # Scroll to new player
+                        tview.see(playerid)
+                        # Get value info on new player
+                        info = tview.item(playerid)["values"]
+                        # Create new player object with info
+                        player = Player(info[0], info[1], info[2], info[3])
+                        # Add player object to list
+                        players.append(player)
+                        # Update players, stop adding
+                        update_playerlist()
+                        adding = False
 
-            # Update totalplayers
 
 # Update list of player objects
 def update_playerlist():
@@ -295,47 +318,64 @@ def edit_player():
     else:
         # Edit rating, check if between 0 and 100
         playerRating = simpledialog.askinteger("Add Player", "Enter player's rating (1-100):", minvalue=0, maxvalue=100)
-        playerTier = calc_rank(playerRating)
-        tview.set(playerid,column=3, value=playerRating)
-        tview.set(playerid,column=4, value=playerTier)
-        # Select new player
-        tview.selection_set(playerid)
-        # Scroll to new player
-        tview.see(playerid)
-        # Update document
-        update_playerlist()
+        # No input, do nothing
+        if playerRating == None:
+            pass
+        else:
+            playerTier = calc_rank(playerRating)
+            # Invalid rank, do nothing
+            if playerTier == None:
+                messagebox.showerror("Error", "Editing didn't work, Please try again!")
+                pass
+            else:
+                tview.set(playerid,column=3, value=playerRating)
+                tview.set(playerid,column=4, value=playerTier)
+                # Select new player
+                tview.selection_set(playerid)
+                # Scroll to new player
+                tview.see(playerid)
+                # Update document
+                update_playerlist()
 # Search for player
 def search_player():
     searchPlayer = simpledialog.askstring("Search Player", "Enter player's name (FistName LastName):")
+    # No input, do nothing 
+    if searchPlayer == None:
+        pass
     # Search for player
-    found = False
-    for i in tview.get_children():
-        x = tview.set(i)
-        # Ignore case sensitivity when comparing names
-        if (x["2"] +  " " +  x["1"]).lower() == searchPlayer.lower():
-            # Select player
-            tview.selection_set(i)
-            tview.see(i)
-            found = True
-            break
-    # Can't find player
-    if found == False:
-        messagebox.showerror("Search Player", searchPlayer + " is not entered in the tournament")
+    else:
+        found = False
+        for i in tview.get_children():
+            x = tview.set(i)
+            # Ignore case sensitivity when comparing names
+            if (x["2"] +  " " +  x["1"]).lower() == searchPlayer.lower():
+                # Select player
+                tview.selection_set(i)
+                tview.see(i)
+                found = True
+                break
+        # Can't find player
+        if found == False:
+            messagebox.showerror("Search Player", searchPlayer + " is not entered in the tournament")
 
 # Calculate player's rank based on their rating
 def calc_rank(rating):
-    if rating < 50:
-        return "Scout"
-    elif rating >= 50 and rating <= 59:
-        return "Ranger"
-    elif rating >= 60 and rating <= 69:
-        return "Agent"
-    elif rating >= 70 and rating <= 79:
-        return "Epic"
-    elif rating >= 80:
-        return "Legend"
-    # Doesn't correspond with existing ranks
-    else:
+    try:
+        if rating < 50:
+            return "Scout"
+        elif rating >= 50 and rating <= 59:
+            return "Ranger"
+        elif rating >= 60 and rating <= 69:
+            return "Agent"
+        elif rating >= 70 and rating <= 79:
+            return "Epic"
+        elif rating >= 80:
+            return "Legend"
+        # Doesn't correspond with existing ranks
+        else:
+            return None
+    # Can't compare, rating isn't an integer
+    except TypeError:
         return None
 
 # Function passed to btnGenerate to generate the teams
