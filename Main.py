@@ -91,6 +91,7 @@ def exit_program():
     answer = messagebox.askyesno("Exit", "Are you sure you want to exit?")
 
     if answer == True:
+        # Re-write text document with new info saved
         update_txt()
         exit()
 
@@ -102,6 +103,7 @@ def exit_program():
 def get_players():
 
     global players, filename, totalPlayers
+    # Reset list
     players = []
     # Open file dialog, ask user to open a file
     # Open file dialog in the running directory of this program
@@ -124,8 +126,10 @@ def get_players():
                 # Append previously created player object to list
                 players.append(player)
                 line = reader.readline()
+    # No file selected
     except FileNotFoundError:
         messagebox.showerror("Error", "Please select a file")
+    # Invalid typse of file selected
     except IndexError:
         messagebox.showerror("Error","This is not a valid file type" )
     btnGenerate.config(state="normal")
@@ -246,7 +250,7 @@ def add_player():
 
             # Update totalplayers
 
-# Update document of players
+# Update list of player objects
 def update_playerlist():
     global players, filename, totalPlayers
     index = 0
@@ -263,7 +267,7 @@ def update_playerlist():
         # Next object in list
         index += 1
         
-        
+# Update text document containing players        
 def update_txt():
     global players, filename
     # Over write file
@@ -272,7 +276,11 @@ def update_txt():
             # For each player object, write comma delimited string on new line
             for x in players:
                 writer.write(x.getLastName() + "," + x.getFirstName() + "," + str(x.getTierScore()) + "," + x.getTier() +"\n")
+    # No filename was chosen
     except NameError:
+        pass
+    # Clicks cancel on open dialog
+    except FileNotFoundError:
         pass
 
 # Edit player rating
@@ -593,6 +601,7 @@ def generate_teams():
 # Initialize window and centre
 root = Tk()
 root.title('Fortnite Team Tournament')
+# Clicks exit 
 root.protocol('WM_DELETE_WINDOW', lambda: exit_program())
 root.geometry('%dx%d+%d+%d' % (912, 740, root.winfo_screenwidth() // 2 - 912 // 2,
     root.winfo_screenheight() // 2 - 740 // 2))
@@ -643,7 +652,6 @@ top_level.resizable(False, False)
 top_level.protocol('WM_DELETE_WINDOW', close_topview)
 top_level.geometry('%dx%d+%d+%d' % (490, 635, root.winfo_screenwidth() // 2 - 490 // 2, root.winfo_screenheight() // 2 - 635 // 2))
 top_level.withdraw()
-
 lblImg = Label(top_level, image=img, bg='white')
 lblImg.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
 # Create tree view in top-level widget
