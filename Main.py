@@ -91,7 +91,7 @@ def exit_program():
     answer = messagebox.askyesno("Exit", "Are you sure you want to exit?")
 
     if answer == True:
-
+        update_txt()
         exit()
 
     else:
@@ -102,7 +102,7 @@ def exit_program():
 def get_players():
 
     global players, filename, totalPlayers
-
+    players = []
     # Open file dialog, ask user to open a file
     # Open file dialog in the running directory of this program
     filename = filedialog.askopenfilename(initialdir=os.getcwd())
@@ -262,11 +262,18 @@ def update_playerlist():
         players[index].setTier(info[3])
         # Next object in list
         index += 1
+        
+        
+def update_txt():
+    global players, filename
     # Over write file
-    with open(filename, "wt") as writer:
-        # For each player object, write comma delimited string on new line
-        for x in players:
-            writer.write(x.getLastName() + "," + x.getFirstName() + "," + str(x.getTierScore()) + "," + x.getTier() +"\n")
+    try:
+        with open(filename, "wt") as writer:
+            # For each player object, write comma delimited string on new line
+            for x in players:
+                writer.write(x.getLastName() + "," + x.getFirstName() + "," + str(x.getTierScore()) + "," + x.getTier() +"\n")
+    except NameError:
+        pass
 
 # Edit player rating
 def edit_player():
@@ -586,6 +593,7 @@ def generate_teams():
 # Initialize window and centre
 root = Tk()
 root.title('Fortnite Team Tournament')
+root.protocol('WM_DELETE_WINDOW', lambda: exit_program())
 root.geometry('%dx%d+%d+%d' % (912, 740, root.winfo_screenwidth() // 2 - 912 // 2,
     root.winfo_screenheight() // 2 - 740 // 2))
 root.resizable(False, False)
