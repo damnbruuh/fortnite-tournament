@@ -299,10 +299,6 @@ def generate_teams():
     global totalPlayers
     global txtTeams
 
-    print(totalPlayers) # debugging
-
-    print(str(len(players)) + " player list length")
-
     # In the event the user clicks generate teams again without clicking clear, we will handle that for them and generate new teams anyway.
     clear_teams()
 
