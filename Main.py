@@ -660,12 +660,14 @@ imgBanner = PhotoImage(file='images/fortnite_banner.png')
 lblBanner = Label(frame, image=imgBanner, padx=10, pady=10, borderwidth=0)
 lblBanner.grid(row=0, column=0, columnspan=5, pady=5)
 rownum, colnum = 1, 0
+# Grid
 for i in range(len(lblFrames)):
     lblFrames[i] = LabelFrame(frame, text='TEAM ' + str(i+1), bg='white', font=('Consolas', 11, 'bold'))
     txtTeams[i] = Text(lblFrames[i], width=25, height=6, font=('Consolas', 8), state='disabled', relief='flat', bg='white')
     txtTeams[i].pack(padx=5, pady=5)
 
     lblFrames[i].grid(row=rownum, column=colnum, padx=5, pady=5)
+    # 4 columns
     if (i + 1) % 4 == 0:
         rownum += 1
         colnum = 0
