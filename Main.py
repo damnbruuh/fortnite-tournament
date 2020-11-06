@@ -33,7 +33,7 @@ def save_teams():
         for x in range(len(txtTeams)):
 
             # Print the team title to the doc file
-            filename.write("TEAM: " + str(x + 1) + "\n\n")
+            filename.write("TEAM " + str(x + 1) + ":\n\n")
 
             # Determine if the text widget has a null string. If it does, print in the doc file that no team was formed.
             if txtTeams[x].get(0.0, END) is None:
